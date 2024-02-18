@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Login Page</title>
+        <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+        <link
+            rel="stylesheet"
+            type="text/css"
+            href="{{ url_for('static', filename='css/styles.css') }}"    
+        >
+    </head>
+    
+    <body>
+        <img class="amblem" src="{{ url_for('static', filename='images/amblem.png') }}">
+        
+        <form action="/login" method="POST">
+            <!-- E-mail / Phone Number -->
+            <div class="text-input-container">
+                <img class="text-input-icon" style="width: 14px; height: 14px;" src="{{ url_for('static', filename='images/user_icon.png') }}">
+                <input class="text-input" type="text" id="email_phone" name="email_phone" placeholder="E-mail Address or Phone Number">
+            </div>
+
+            <!-- Password -->
+            <div class="text-input-container" style="margin-top: 8px;">
+                <img class="text-input-icon" style="width: 14px; height: 14px;" src="{{ url_for('static', filename='images/lock_icon.png') }}">
+                <input class="text-input" style="background-color: #e9ecef;" type="text" id="password" name="password" placeholder="Password">
+            </div>
+
+            <!-- Submit -->
+            <div class="text-input-container" style="margin-top: 8px;">
+                <input class="submit-button" type="submit" value="LOGIN">
+            </div>
+        </form>
+
+        <form action="/google_auth" method="POST">
+            <!-- Sign in with Google -->
+            <div class="text-input-container" style="margin-top: 8px;">
+                <input class="google-login-button" type="submit" value="Sign in with Google">
+            </div>
+        </form>
+
+        <div class="login-footer">
+            Bilkent University Webmail &nbsp;•&nbsp; <a>FAQ</a>
+        </div>
+    </body>
+</html>

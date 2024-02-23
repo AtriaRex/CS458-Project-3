@@ -23,6 +23,8 @@ flow = Flow.from_client_secrets_file(
     redirect_uri="http://127.0.0.1:5000/callback"
 ) 
 
+users = {"user1": "pass1", "user2": "pass2"}
+
 
 # Create flask app
 app = Flask(__name__)
@@ -49,9 +51,15 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
     
-    elif request.method == "POST":    
-        # Check inputs
-        return "TODO"
+    elif request.method == "POST":
+        email_phone = request.form['email_phone']
+        password = request.form['password']
+
+        if users[email_phone] == password:
+            return "Logged in"
+        else:
+            return "Wrong username or password"
+
 
 # Google authentication handlers
 @app.route("/google_auth", methods=["POST"])

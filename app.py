@@ -55,7 +55,9 @@ def login():
         email_phone = request.form['email_phone']
         password = request.form['password']
 
-        if users[email_phone] == password:
+        user_password = users.get(email_phone)
+        
+        if user_password and user_password == password:
             return "Logged in"
         else:
             return "Wrong username or password"

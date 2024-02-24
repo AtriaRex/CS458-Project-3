@@ -9,6 +9,18 @@
             type="text/css"
             href="{{ url_for('static', filename='css/styles.css') }}"    
         >
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var passwordFields = document.querySelectorAll('input[type="password"]');
+
+                passwordFields.forEach(function(field) {
+                field.addEventListener('paste', function(event) {
+                event.preventDefault(); // Prevent the default paste behavior
+                });
+            });
+        });
+
+        </script>
     </head>
     
     <body>
@@ -24,7 +36,7 @@
             <!-- Password -->
             <div class="text-input-container" style="margin-top: 8px;">
                 <img class="text-input-icon" style="width: 14px; height: 14px;" src="{{ url_for('static', filename='images/lock_icon.png') }}">
-                <input class="text-input" style="background-color: #e9ecef;" type="text" id="password" name="password" placeholder="Password">
+                <input class="text-input" style="background-color: #e9ecef;" type="password" id="password" name="password" placeholder="Password">
             </div>
 
             <!-- Submit -->

@@ -9,23 +9,21 @@
             type="text/css"
             href="{{ url_for('static', filename='css/styles.css') }}"    
         >
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var passwordFields = document.querySelectorAll('input[type="password"]');
-
-                passwordFields.forEach(function(field) {
-                field.addEventListener('paste', function(event) {
-                event.preventDefault(); // Prevent the default paste behavior
-                });
-            });
-        });
-
-        </script>
     </head>
     
     <body>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{category}}">
+                        <strong>Warning!</strong> {{message}}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <img class="amblem" src="{{ url_for('static', filename='images/amblem.png') }}">
-        
+
         <form action="/login" method="POST">
             <!-- E-mail / Phone Number -->
             <div class="text-input-container">

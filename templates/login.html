@@ -9,6 +9,18 @@
             type="text/css"
             href="{{ url_for('static', filename='css/styles.css') }}"    
         >
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var passwordFields = document.querySelectorAll('input[type="password"]');
+
+                passwordFields.forEach(function(field) {
+                    field.addEventListener('paste', function(event) {
+                        event.preventDefault(); // Prevent the default paste behavior
+                    });
+                });
+            });
+        </script>
     </head>
     
     <body>

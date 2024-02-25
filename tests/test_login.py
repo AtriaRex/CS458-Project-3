@@ -110,3 +110,19 @@ def test_4_password_field_not_pastable():
     assert INPUT_CANT_BE_BLANK_MSG in driver.page_source
     driver.close()
 
+def test_5_signin_out_clears_credentials():
+    (driver, username, password) = set_up()
+    username.send_keys("admin@admin.com")
+    password.send_keys("admin123")
+    username.send_keys(Keys.RETURN)
+
+    logout_button = driver.find_element(By.ID, "logout")
+    logout_button.click()
+
+    # check that the username and password are empty
+    username = driver.find_element(By.ID, "email_phone").get_attribute("value")
+    password = driver.find_element(By.ID, "password").get_attribute("value")
+
+    assert username == ""
+    assert password == ""
+    

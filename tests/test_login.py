@@ -72,6 +72,17 @@ def test_1_incorrect_username_correct_password():
     assert WRONG_CREDENTIALS_MSG in driver.page_source
     driver.close()
 
+
+def test_1_empty_username_empty_password():
+    (driver, username, password) = set_up()
+
+    username.send_keys(Keys.RETURN)
+
+    assert LOGGED_IN_MSG not in driver.page_source
+    assert INPUT_CANT_BE_BLANK_MSG in driver.page_source
+    driver.close()
+
+
 def test_3_sql_injection_in_username_field():
     (driver, username, password) = set_up()
     username.send_keys("' OR '1'='1")

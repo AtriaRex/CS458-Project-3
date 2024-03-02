@@ -2,7 +2,12 @@ from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 import pyperclip
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 LOGGED_IN_MSG = "You are logged in"
 INVALID_EMAIL_OR_PHONE_MSG = "Please enter a valid Email Address or a Phone Number"
@@ -11,6 +16,15 @@ INPUT_CANT_BE_BLANK_MSG = "Email Address/Phone Number or Password cannot be blan
 
 def set_up():
     driver = webdriver.Chrome()
+    
+    if os.environ.get("CHROME_USER_DATA_DIR") != None and os.environ.get("CHROME_USER_DATA_DIR") != "":
+        print(os.environ.get("CHROME_USER_DATA_DIR"))
+        
+        options = webdriver.ChromeOptions() 
+        options.add_argument("user-data-dir=" + os.environ["CHROME_USER_DATA_DIR"])
+        service = Service(executable_path=os.environ["CHROME_EXE_PATH"])
+        driver = webdriver.Chrome(service=service, options=options)
+    
     driver.get("http://127.0.0.1:5000")
     username = driver.find_element(By.ID, "email_phone")
     username.clear()
@@ -137,3 +151,10 @@ def test_5_signin_out_clears_credentials():
     assert username == ""
     assert password == ""
     
+
+def test_6_google_login():
+    (driver, username, password) = set_up()
+    
+    google_login_button = driver.find_element(By.ID, "google-login-button")
+    google_login_button.click()
+

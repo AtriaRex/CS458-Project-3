@@ -14,6 +14,5 @@ app = Flask(__name__)
 app.secret_key = "CS 458 Project #1"
 app.register_blueprint(bp)
 
-
 if __name__ == "__main__":
     app.run(debug=True)

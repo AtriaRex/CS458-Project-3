@@ -3,6 +3,7 @@ import google.auth.transport.requests
 from pip._vendor import cachecontrol
 from google.oauth2 import id_token
 import requests
+import json
 import re
 
 from src.google_auth import GOOGLE_CLIENT_ID, flow
@@ -38,19 +39,25 @@ def login():
                     return True
     
             return False
-        
-        if re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email_phone):
-            # Valid email address
-            pass
-        elif _is_valid_phone(email_phone):
+
+        if _is_valid_phone(email_phone):
             # Valid phone number
+            pass        
+        elif re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email_phone):
+            # Valid email address
             pass
         else:
             flash("Please enter a valid Email Address or a Phone Number", "alert alert-warning")
             return redirect("/login")
             
-        # Check if the user can login
-        if email_phone == "admin@admin.com" and password == "admin123":
+        # Check if the credentials are valid 
+        with open("users.json") as users_file:
+            # Read users 
+            users = json.load(users_file)
+
+        valid_users = list(filter(lambda user: user["email_phone"] == email_phone and user["password"] == password, users))
+        if valid_users:
+            session["id"] = email_phone
             session["logged_in"] = True
             return redirect("/mail")
         else:
@@ -85,7 +92,7 @@ def callback():
         audience=GOOGLE_CLIENT_ID
     )
 
-    session["google_id"] = id_info.get("sub")
+    session["id"] = id_info.get("sub")
     session["logged_in"] = True
 
     return redirect("/mail")

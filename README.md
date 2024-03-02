@@ -1,8 +1,23 @@
-#TODO
+# Dependencies
+- Python 3.10+
 
+# Setup
 
+- Create a virtual python environment \
+    ``` python -m venv .venv ```
+
+- Activate the virtual environment
+    - Windows: ``` .venv\Scripts\activate ```
+    - Linux / Mac: ``` source .venv/bin/activate ```
+
+- Install required packages \
+    ``` pip install -r requirements.txt ```
+
+# How to run
+- Run the Flask app \
+    ``` python -m flask run -h 127.0.0.1 -p 5000 ```
 
 # How to test
-After installing the dependencies, you can run the command "pytest" to test all of the tests.
-For the google login test you will need to edit the .env file and add your chrome.exe and chrome user directory path.
-This is required because otherwise google detects that we are using Selenium and blocks it.
+- Run the Flask app
+- While the Flask app is running, start the test \
+    ``` python -m pytest ```

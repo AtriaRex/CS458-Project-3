@@ -37,13 +37,14 @@ def login():
                 phone_number.startswith("05") and len(phone_number) == 11 or \
                 phone_number.startswith("5") and len(phone_number) == 10:
                     return True
-    
             return False
+        def _is_valid_email(email: str) -> bool:
+            return re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email) 
 
         if _is_valid_phone(email_phone):
             # Valid phone number
             pass        
-        elif re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email_phone):
+        elif _is_valid_email(email_phone):
             # Valid email address
             pass
         else:

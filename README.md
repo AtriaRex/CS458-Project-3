@@ -16,6 +16,7 @@
 # How to run
 - Run the Flask app \
     ``` python -m flask run -h 127.0.0.1 -p 5000 ```
+- Open an internet browser and navigate to http://127.0.0.1:5000/login
 
 # How to test
 - Run the Flask app

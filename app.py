@@ -13,4 +13,4 @@ app.secret_key = "CS 458 Project #1"
 app.register_blueprint(bp)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port="5000")

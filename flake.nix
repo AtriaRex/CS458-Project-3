@@ -20,6 +20,7 @@
               python-lsp-server
               python-lsp-ruff
             ])))
+            nodejs_21
           ];
         };
       });

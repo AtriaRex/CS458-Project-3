@@ -67,7 +67,7 @@
 
 <script>
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(coordinatesCallback);
+        navigator.geolocation.getCurrentPosition(coordinatesCallbackSea);
     } else {
         console.log("Geolocation is not supported by this browser.");
     }
@@ -83,7 +83,7 @@
 
 
         <p>Nearest Sea: <span id="nearestSea"></span></p>
-        <p>Distance to Nearest Sea: <span id="nearestSeaDistance"></span></p>
+        <p>Distance to Nearest Sea: <span id="nearestSeaDistance"></span> meters</p>
 
 
         <form action="/logout" method="POST">

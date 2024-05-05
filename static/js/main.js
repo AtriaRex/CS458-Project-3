@@ -16,6 +16,25 @@ function calculateDistance(point1, point2) {
     return d;
 }
 
+// gets the distance to the center of the sun from a given coordinates on earth
+async function getDistanceToSun(longitude, latitude) {
+    const result = await fetch("calculate-distance-to-sun", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body:
+            JSON.stringify({
+                longitude: longitude,
+                latitude: latitude
+            })
+    });
+    const distance = await result.json();
+    console.log(distance);
+
+    return distance;
+}
+
 const SEA_COORDS = {
     "BlackSea": { lat: 43.4130, lon: 34.2993 },
     "MarmaraSea": { lat: 40.6681, lon: 28.1123 },
@@ -35,7 +54,7 @@ function findNearestSea(position) {
     return nearestSea;
 }
 
-function coordinatesCallback(position) {
+function coordinatesCallbackSea(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
 
@@ -49,8 +68,19 @@ function coordinatesCallback(position) {
     console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
 };
 
+async function coordinatesCallbackSun(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+
+    let distance = await getDistanceToSun(longitude, latitude);
+    const distanceText = document.querySelector("#distanceToSun");
+    distanceText.textContent = distance.distance;
+};
+
 module.exports = {
     calculateDistance,
-    coordinatesCallback,
+    coordinatesCallbackSea,
     findNearestSea,
+    coordinatesCallbackSun,
+    getDistanceToSun
 };

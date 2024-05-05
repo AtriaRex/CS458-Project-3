@@ -1,15 +1,43 @@
-from flask import Blueprint, request, render_template, session, redirect, abort, flash
+from flask import Blueprint, request, render_template, session, redirect, abort, flash, jsonify
 import google.auth.transport.requests
 from pip._vendor import cachecontrol
 from google.oauth2 import id_token
 import requests
 import json
 import re
+from datetime import datetime
+from astropy.time import Time
+from astropy.coordinates import get_sun, EarthLocation, SkyCoord
+from astropy import units as u
+
 
 from src.google_auth import GOOGLE_CLIENT_ID, flow
 
 bp = Blueprint("routes", __name__)
 
+
+@bp.route("/calculate-distance-to-sun", methods=["POST"])
+def calculate_distance_to_sun():
+    parameters = request.get_json()
+    longitude, latitude = parameters["longitude"], parameters["latitude"]
+
+    time = Time.now()
+
+    earth_location = EarthLocation.from_geodetic(longitude, latitude)
+
+    sun_coord = get_sun(time)
+
+    earth_location_icrs = earth_location.get_itrs(obstime=time).transform_to(sun_coord.frame)
+
+    # Calculate distance
+    distance = sun_coord.separation_3d(earth_location_icrs)
+
+    return jsonify({"distance": distance.to(u.km).value})
+
+# Login Page
+@bp.route("/distance-to-sun", methods=["GET"])
+def distance_to_sun():
+    return render_template("distance-to-sun.html")
 
 # Login Page
 @bp.route("/")

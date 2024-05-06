@@ -35,30 +35,29 @@ async function getDistanceToSun(longitude, latitude) {
     return distance;
 }
 
-const SEA_COORDS = {
-    "BlackSea": { lat: 43.4130, lon: 34.2993 },
-    "MarmaraSea": { lat: 40.6681, lon: 28.1123 },
-    "AegeanSea": { lat: 39.0192, lon: 25.2686 },
-    "MediterraneanSea": { lat: 34.5531, lon: 18.0480 },
-};
+async function getNearestSea(position) {
+    const result = await fetch("get-closest-sea", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body:
+            JSON.stringify({
+                longitude: position.lon,
+                latitude: position.lat,
+            })
+    });
+    const sea = await result.json();
+    console.log(sea);
 
-function findNearestSea(position) {
-    let nearestSea = null;
-    for (const [sea, coords] of Object.entries(SEA_COORDS)) {
-        let distance = calculateDistance(position, coords);
-        if (!nearestSea || distance < nearestSea.distance) {
-            nearestSea = { sea, distance };
-        }
-    }
-
-    return nearestSea;
+    return sea;
 }
 
 function coordinatesCallbackSea(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
 
-    const nearestSea = findNearestSea({ lat: latitude, lon: longitude });
+    const nearestSea = getNearestSea({ lat: latitude, lon: longitude });
     const nearestSeaText = document.querySelector("#nearestSea");
     nearestSeaText.textContent = nearestSea.sea;
 

@@ -9,11 +9,24 @@ from datetime import datetime
 from astropy.time import Time
 from astropy.coordinates import get_sun, EarthLocation, SkyCoord
 from astropy import units as u
+import requests
+from shapely.geometry import Point, shape, Polygon
+from shapely.ops import nearest_points
 
 
 from src.google_auth import GOOGLE_CLIENT_ID, flow
 
 bp = Blueprint("routes", __name__)
+
+@bp.route("/get-closest-sea", methods=["POST"])
+def get_closest_sea():
+    parameters = request.get_json()
+    longitude, latitude = parameters["longitude"], parameters["latitude"]
+
+    closest_sea = "asd"
+    closest_distance = 0
+
+    return jsonify({"closest_sea": closest_name, "closes_distance": closest_distance})
 
 
 @bp.route("/calculate-distance-to-sun", methods=["POST"])

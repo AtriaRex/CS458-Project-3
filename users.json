@@ -1,10 +1,6 @@
 [
     {
-        "email_phone": "admin@admin.com",
-        "password": "admin123"
-    },
-    {
-        "email_phone": "john.doe@johndoehub.com",
-        "password": "johndoe123"        
-    }    
+        "email_phone": "admin@bilkent.edu.tr",
+        "password": "bilkent123"
+    }
 ]

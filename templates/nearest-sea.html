@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Nearest Sea</title>
+        <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:400,400i,700,900&display=swap" rel="stylesheet">
+    </head>
+
+    <style>
+
+    </style>
+
+    <body>  
+        <div>
+            
+        </div>
+    </body>
+
+    <script>
+        // Coastline Points (CONSTANTS)
+        // A coordinate point [latitude, longitude] along the coastline is recorded approximately at every 200 kilometers
+        const MEDITERRANEAN_COAST = [];
+        const BLACKSEA_COAST = [];
+        const MARMARA_COAST = [];
+        const AEGEAN_COAST = [];
+
+        /** A function that takes in a coordinate and outputs the nearest sea to that coordinate. 
+            The seas considered are the Mediterranean Sea, the Black Sea, the Sea of Marmara and the Aegean Sea 
+
+         * lat (float) - The latitude of the coordinate
+         * long (float) - The longitude of the coordinate
+         * returns distanceToNearestSea (Object) - An object in the following format: 
+                                                    {
+                                                        sea (string): The name of nearest sea to the given coordinate, 
+                                                        distance (float): The distance, in kilometers, to the nearest sea from the given coordinates 
+                                                    }
+        */
+        function getDistanceToNearestSea(lat, long) {
+            let distanceToNearestSea = {distance: Infinity, sea: ""};
+            
+            function updateDistanceToNearestSea(coastline, name) {
+                for (let idx = 1; i < coastline.length; i++) {
+                    // A line can be drawn using two coordinate points
+                    line = [coastline[i-1], coastline[i]];
+
+                    // Finding the point on the line that is closest to the client's location 
+                    closestCoord = closestPointOnLine(line[0][0], line[0][1], line[1][0], line[1][1], lat, long);
+
+                    // Calculating the distance in kilometers between the closes point on the line and the client's location
+                    distanceInKm = calculateDistanceInKm(lat, long, closestCoord.lat, closestCoord.long);
+
+                    // Updating the distanceToNearestSea variable
+                    if (distanceInKm < distanceToNearestSea.distance) {
+                        distanceToNearestSea.distance = distanceInKm;
+                        distanceToNearestSea.sea = name;
+                    }
+                }
+            }
+
+            // Calculations for all coastlines
+            updateDistanceToNearestSea(MEDITERRANEAN_COAST, "Mediterranean");
+            updateDistanceToNearestSea(BLACKSEA_COAST, "Black Sea");
+            updateDistanceToNearestSea(MARMARA_COAST, "Sea of Marmara");
+            updateDistanceToNearestSea(AEGEAN_COAST, "Aegean Sea");
+
+            return distanceToNearestSea
+        }
+
+        /** A function that returns the point on the line formed by the points (lat1, long1) and (lat2, long2) that is closest to the point (lat0, long0)  
+            All inputs are of type float
+          
+         * returns closestPoint (Object) - An object in the following format: 
+                                            {
+                                                lat (float): The latitude of the closest point, 
+                                                long (float): The longitude fo the closest point
+                                            }
+        */
+        function closestPointOnLine(lat1, long1, lat2, long2, lat0, long0) {
+            const calculateLineEquation = (x1, y1, x2, y2) => {
+                // Calculate the slope (m) and y-intercept (c) of the line passing through points A and B
+                const m = (y2 - y1) / (x2 - x1);
+                const c = y1 - m * x1;
+                return { m, c };
+            }
+            const degToRad = (deg) => deg * (Math.PI / 180);
+            const radToDeg = (rad) => rad * (180 / Math.PI);
+
+            const lat1Rad = degToRad(lat1);
+            const long1Rad = degToRad(long1)
+            const lat2Rad = degToRad(lat2);
+            const long2Rad = degToRad(long2)
+            const lat0Rad = degToRad(lat0);
+            const long0Rad = degToRad(long0)
+
+            // Calculate the equation of the line passing through points A and B
+            const { m, c } = calculateLineEquation(long1Rad, lat1Rad, long2Rad, lat2Rad);
+
+            // Calculate the perpendicular distance from point C to the line
+            const distanceToLine = (m * long0Rad - lat0Rad + c) / Math.sqrt(m**2 + 1);
+
+            // Calculate the coordinates of the intersection point
+            const xIntersect = (m * (lat0Rad - c) + long0Rad) / (m**2 + 1);
+            const yIntersect = m * xIntersect + c;
+
+            // Check if the intersection point lies between points A and B
+            if ((xIntersect >= Math.min(long1Rad, long2Rad) && xIntersect <= Math.max(long1Rad, long2Rad)) &&
+                (yIntersect >= Math.min(lat1Rad, lat2Rad) && yIntersect <= Math.max(lat1Rad, lat2Rad))) {
+                return { lat: radToDeg(yIntersect), long: radToDeg(xIntersect) };
+            } else {
+                // If the intersection point is outside the line segment, return the closest endpoint
+                const distToA = Math.sqrt((long1Rad - long0Rad)**2 + (lat1Rad - lat0Rad)**2);
+                const distToB = Math.sqrt((long2Rad - long0Rad)**2 + (lat2Rad - lat0Rad)**2);
+                return distToA < distToB ? { long: radToDeg(long1Rad), lat: radToDeg(lat1Rad) } : { long: radToDeg(long2Rad), lat: radToDeg(lat2Rad) };
+            }
+        }
+
+        /** A function that calculates the distance (in kilometers) between two coordinate points 
+            All inputs are of type float
+         * returns distance (float) - the distance (in kilometers) between the coordinates 
+        */
+        function calculateDistanceInKm(lat1, lon1, lat2, lon2) {
+            const earthRadiusKm = 6371; // Radius of the Earth in kilometers
+
+            // Convert latitude and longitude from degrees to radians
+            const degToRad = (deg) => deg * (Math.PI / 180);
+            const lat1Rad = degToRad(lat1);
+            const lon1Rad = degToRad(lon1);
+            const lat2Rad = degToRad(lat2);
+            const lon2Rad = degToRad(lon2);
+
+            // Calculate differences
+            const latDiff = lat2Rad - lat1Rad;
+            const lonDiff = lon2Rad - lon1Rad;
+
+            // Calculate Haversine distance
+            const a = Math.sin(latDiff / 2) * Math.sin(latDiff / 2) +
+                    Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                    Math.sin(lonDiff / 2) * Math.sin(lonDiff / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = earthRadiusKm * c;
+
+            return distance;
+        }
+
+        // Check if the client's device supports geolocation
+        if (navigator.geolocation) {    
+            navigator.geolocation.getCurrentPosition((position) => {
+                lat = position.coords.latitude;
+                long = position.coords.longitude;
+
+                distanceToNearestSea = getDistanceToNearestSea(lat, long);
+
+                //TODO
+                console.log(distanceToNearestSea)
+            });
+        } else { 
+            //TODO
+        }
+    </script>
+</html>

@@ -59,7 +59,7 @@ def test_maximum_distance():
         longitude = random.random() * 9 + 26 # longitude in Turkey
         latitude = random.random() * 6 + 36 # latitude in Turkey
         sea = get_closest_sea_helper(longitude, latitude)
-        assert sea["distance"] < 1650000 # 1650 km
+        assert sea["distance"] < 500
 
 def test_correct_sea_returned():
     sea = get_closest_sea_helper(39.71, 41.00) # coordinates of Trabzon 

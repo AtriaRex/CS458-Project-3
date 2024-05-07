@@ -115,7 +115,7 @@ def logout():
 
 # Protected pages
 @bp.route("/nearest-sea", methods=["GET"])
-def distance_to_sun():
+def nearest_sea():
     if "logged_in" not in session or session["logged_in"] != True:
         return abort(401) 
     

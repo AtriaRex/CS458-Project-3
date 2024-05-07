@@ -4,25 +4,62 @@
         <meta charset="UTF-8">
         <title>Nearest Sea</title>
         <link href="https://fonts.googleapis.com/css?family=Nunito+Sans:400,400i,700,900&display=swap" rel="stylesheet">
+
+        <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js"></script>
+        <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css" rel="stylesheet" />
     </head>
 
     <style>
+        .info {
+            margin: 1% 0% 0% 1%;
+            padding: 0.5% 1% 0.5% 1%;
 
+            position: absolute;
+            z-index: 1;
+
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        .button {
+            padding: 0.5% 1% 0.5% 1%;
+            margin: 1% 0% 0% 80%;
+
+            position: absolute;
+            z-index: 1;
+
+            background-color: white;
+            border-radius: 10px;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 99.5%;
+        }
     </style>
 
-    <body>  
-        <div>
-            
+    <body> 
+        <div id="error-message-div">
+            <div class="info">
+                The nearest sea to your location is the <span id="sea-name" style="font-weight: bold;"></span> at a distance of <span id="distance"></span> kilometers
+            </div>
         </div>
+        <button class="button" onclick="window.location = 'https://127.0.0.1:5000/distance-to-sun'">
+            Distance to Sun
+        </button>
+        <div id="map" />
     </body>
 
     <script>
         // Coastline Points (CONSTANTS)
         // A coordinate point [latitude, longitude] along the coastline is recorded approximately at every 200 kilometers
         const MEDITERRANEAN_COAST = [];
-        const BLACKSEA_COAST = [];
+        const BLACKSEA_COAST = [[41.982821192008274,28.029633854862027],[41.870594331067316,27.98268057268274],[41.65515335101047,28.08856419724509],[41.583942104114335,28.14743326126836],[41.494645472233806,28.278964213721338],[41.35695269014999,28.6195763492276],[41.24584942915115,29.013210011340448],[41.235448833358426,29.256630562486066],[41.17069037637874,29.59186180900656],[41.13947804403843,30.149579313205777],[41.20962114056582,30.271279671104253],[41.07399442203567,30.967644721515512],[41.116157994139115,31.291749900655873],[41.193967526410695,31.38891265343625],[41.31757771107527,31.404703611348623],[41.72130064879382,32.300775461217654],[42.030029527543384,33.34265297600757],[41.95182302083751,34.227473795040964],[42.03355040880394,35.060736390023976],[41.685389525689395,35.41553085891405],[41.732840846288056,35.960693814031856],[41.28738640192598,36.35082430686373],[41.38117207964824,36.6597203470144],[41.14838329203088,37.16340881163762],[41.115103968595015,37.78705250206235],[40.95552440280881,38.11383364432322],[41.07981248538896,39.1821684303618],[41.00113151639205,39.745380600481894],[40.996987923759555,40.327478027254756],[41.325717851911605,41.2394792528753],[41.52126549686032,41.5387651939991]];
         const MARMARA_COAST = [];
         const AEGEAN_COAST = [];
+
 
         /** A function that takes in a coordinate and outputs the nearest sea to that coordinate. 
             The seas considered are the Mediterranean Sea, the Black Sea, the Sea of Marmara and the Aegean Sea 
@@ -36,15 +73,19 @@
                                                     }
         */
         function getDistanceToNearestSea(lat, long) {
-            let distanceToNearestSea = {distance: Infinity, sea: ""};
+            let distanceToNearestSea = {distance: Infinity};
             
             function updateDistanceToNearestSea(coastline, name) {
-                for (let idx = 1; i < coastline.length; i++) {
+                let line;
+                let closestCoord;
+                let distanceInKm; 
+                
+                for (let idx = 1; idx < coastline.length; idx++) {
                     // A line can be drawn using two coordinate points
-                    line = [coastline[i-1], coastline[i]];
+                    line = [coastline[idx-1], coastline[idx]];
 
                     // Finding the point on the line that is closest to the client's location 
-                    closestCoord = closestPointOnLine(line[0][0], line[0][1], line[1][0], line[1][1], lat, long);
+                    closestCoord = findClosestPointOnLine(line[0][0], line[0][1], line[1][0], line[1][1], lat, long);
 
                     // Calculating the distance in kilometers between the closes point on the line and the client's location
                     distanceInKm = calculateDistanceInKm(lat, long, closestCoord.lat, closestCoord.long);
@@ -53,6 +94,7 @@
                     if (distanceInKm < distanceToNearestSea.distance) {
                         distanceToNearestSea.distance = distanceInKm;
                         distanceToNearestSea.sea = name;
+                        distanceToNearestSea.nearestPoint = closestCoord;
                     }
                 }
             }
@@ -63,19 +105,19 @@
             updateDistanceToNearestSea(MARMARA_COAST, "Sea of Marmara");
             updateDistanceToNearestSea(AEGEAN_COAST, "Aegean Sea");
 
-            return distanceToNearestSea
+            return distanceToNearestSea;
         }
 
         /** A function that returns the point on the line formed by the points (lat1, long1) and (lat2, long2) that is closest to the point (lat0, long0)  
+            The curvature of the Earth's surface can be ignored since the distance between two coastline points is neglectable compared to the Earth's size 
             All inputs are of type float
-          
          * returns closestPoint (Object) - An object in the following format: 
                                             {
                                                 lat (float): The latitude of the closest point, 
                                                 long (float): The longitude fo the closest point
                                             }
         */
-        function closestPointOnLine(lat1, long1, lat2, long2, lat0, long0) {
+        function findClosestPointOnLine(lat1, long1, lat2, long2, lat0, long0) {
             const calculateLineEquation = (x1, y1, x2, y2) => {
                 // Calculate the slope (m) and y-intercept (c) of the line passing through points A and B
                 const m = (y2 - y1) / (x2 - x1);
@@ -134,8 +176,8 @@
 
             // Calculate Haversine distance
             const a = Math.sin(latDiff / 2) * Math.sin(latDiff / 2) +
-                    Math.cos(lat1Rad) * Math.cos(lat2Rad) *
-                    Math.sin(lonDiff / 2) * Math.sin(lonDiff / 2);
+                      Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                      Math.sin(lonDiff / 2) * Math.sin(lonDiff / 2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
             const distance = earthRadiusKm * c;
 
@@ -145,16 +187,33 @@
         // Check if the client's device supports geolocation
         if (navigator.geolocation) {    
             navigator.geolocation.getCurrentPosition((position) => {
-                lat = position.coords.latitude;
-                long = position.coords.longitude;
+                let lat = position.coords.latitude;
+                let long = position.coords.longitude;
 
-                distanceToNearestSea = getDistanceToNearestSea(lat, long);
+                const distanceToNearestSea = getDistanceToNearestSea(lat, long);
 
-                //TODO
-                console.log(distanceToNearestSea)
+                const seaSpan = document.getElementById("sea-name");
+                seaSpan.innerText = distanceToNearestSea.sea
+                const distanceSpan = document.getElementById("distance")
+                distanceSpan.innerText = distanceToNearestSea.distance
+
+                maptilersdk.config.apiKey = 'WI0lnalmSEwRVmJqsi8G';
+                const map = new maptilersdk.Map({
+                    container: 'map', // container's id or the HTML element to render the map
+                    style: maptilersdk.MapStyle.STREETS,
+                    center: [long, lat], // starting position [lng, lat]
+                    zoom: 5, // starting zoom
+                });
+                const clientMarker = new maptilersdk.Marker({color: "#FF0000"})
+                    .setLngLat([long, lat])
+                    .addTo(map);
+                const seaMarker = new maptilersdk.Marker()
+                    .setLngLat([distanceToNearestSea.nearestPoint.long, distanceToNearestSea.nearestPoint.lat])
+                    .addTo(map);
             });
         } else { 
-            //TODO
+            const errorMessageDiv = document.getElementById("error-message-div")
+            errorMessageDiv.innerText = "The device does not support geolocation"
         }
     </script>
 </html>

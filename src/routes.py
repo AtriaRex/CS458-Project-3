@@ -18,15 +18,18 @@ from src.google_auth import GOOGLE_CLIENT_ID, flow
 
 bp = Blueprint("routes", __name__)
 
+def get_closest_sea_helper(longitude, latitude):
+    return {"sea": "asd", "distance": 0}
+
+
 @bp.route("/get-closest-sea", methods=["POST"])
 def get_closest_sea():
     parameters = request.get_json()
     longitude, latitude = parameters["longitude"], parameters["latitude"]
 
-    closest_sea = "asd"
-    closest_distance = 0
+    sea = get_closest_sea_helper(longitude, latitude)
 
-    return jsonify({"closest_sea": closest_name, "closes_distance": closest_distance})
+    return jsonify(sea)
 
 def calculate_distance_to_sun_helper(longitude, latitude, time):
     earth_location = EarthLocation.from_geodetic(longitude, latitude)

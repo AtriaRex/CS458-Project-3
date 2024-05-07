@@ -67,7 +67,9 @@
 
 <script>
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(coordinatesCallbackSea);
+        navigator.geolocation.getCurrentPosition(coordinatesCallbackSea, error => {
+            alert("Please allow location access to calculate the distance to the nearest sea.");
+        });
     } else {
         console.log("Geolocation is not supported by this browser.");
     }

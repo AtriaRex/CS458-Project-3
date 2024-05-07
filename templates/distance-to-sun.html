@@ -50,9 +50,9 @@
 <body>
     <div class="card">
         <span>longitude</span>
-        <input id="longitude" />
+        <input id="longitude" type="number" />
         <span>latitude</span>
-        <input id="latitude" />
+        <input id="latitude" type="number" />
 
         <button id="manualCalculation">Use The Given Longitude And Latitude</button>
         <button id="automaticCalculation">Get Location From Browser</button>
@@ -62,7 +62,26 @@
 </body>
 
 <script>
+    let longitude = document.querySelector("#longitude");
+    let latitude = document.querySelector("#latitude");
+
     let manualButton = document.querySelector("#manualCalculation");
+
+    longitude.addEventListener("input", () => {
+        if (longitude.value == "" || latitude.value == "") {
+            manualButton.disabled = true;
+        } else {
+            manualButton.disabled = false;
+        }
+    });
+
+    latitude.addEventListener("input", () => {
+        if (latitude.value == "" || longitude.value == "") {
+            manualButton.disabled = true;
+        } else {
+            manualButton.disabled = false;
+        }
+    });
 
     manualButton.addEventListener("click", async () => {
         let longitude = document.querySelector("#longitude").value;
@@ -75,9 +94,11 @@
     let automaticButton = document.querySelector("#automaticCalculation");
     automaticButton.addEventListener("click", async () => {
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(coordinatesCallbackSun);
+            navigator.geolocation.getCurrentPosition(coordinatesCallbackSun, error => {
+                alert("Please allow location access to calculate the distance to the Sun");
+            });
         } else {
-            console.log("Geolocation is not supported by this browser.");
+            alert("Geolocation is not supported by this browser.");
         }
     });
 </script>

@@ -28,14 +28,7 @@ def get_closest_sea():
 
     return jsonify({"closest_sea": closest_name, "closes_distance": closest_distance})
 
-
-@bp.route("/calculate-distance-to-sun", methods=["POST"])
-def calculate_distance_to_sun():
-    parameters = request.get_json()
-    longitude, latitude = parameters["longitude"], parameters["latitude"]
-
-    time = Time.now()
-
+def calculate_distance_to_sun_helper(longitude, latitude, time):
     earth_location = EarthLocation.from_geodetic(longitude, latitude)
 
     sun_coord = get_sun(time)
@@ -45,7 +38,17 @@ def calculate_distance_to_sun():
     # Calculate distance
     distance = sun_coord.separation_3d(earth_location_icrs)
 
-    return jsonify({"distance": distance.to(u.km).value})
+    return distance.to(u.km).value
+
+
+@bp.route("/calculate-distance-to-sun", methods=["POST"])
+def calculate_distance_to_sun():
+    parameters = request.get_json()
+    longitude, latitude = parameters["longitude"], parameters["latitude"]
+
+    distance = calculate_distance_to_sun_helper(longitude, latitude, Time.now())
+
+    return jsonify({"distance": distance})
 
 # Login Page
 @bp.route("/distance-to-sun", methods=["GET"])

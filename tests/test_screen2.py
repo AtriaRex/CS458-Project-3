@@ -55,7 +55,7 @@ def test_should_not_return_lakes():
     assert sea["sea"] != "Van Lake"
 
 def test_maximum_distance():
-    for i in range(5):
+    for i in range(100):
         longitude = random.random() * 9 + 26 # longitude in Turkey
         latitude = random.random() * 6 + 36 # latitude in Turkey
         sea = get_closest_sea_helper(longitude, latitude)

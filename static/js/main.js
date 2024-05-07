@@ -79,7 +79,7 @@ async function coordinatesCallbackSun(position) {
 module.exports = {
     calculateDistance,
     coordinatesCallbackSea,
-    findNearestSea,
+    getNearestSea,
     coordinatesCallbackSun,
     getDistanceToSun
 };

@@ -2,5 +2,9 @@
     {
         "email_phone": "admin@bilkent.edu.tr",
         "password": "bilkent123"
+    },
+    {
+        "email_phone": "admin@admin.com",
+        "password": "admin123"
     }
 ]

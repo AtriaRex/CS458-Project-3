@@ -13,6 +13,41 @@ from src.routes import calculate_distance_to_sun_helper, get_closest_sea_helper
 
 load_dotenv()
 
+def selenium_set_up():
+    driver = webdriver.Chrome()
+    
+    if os.environ.get("CHROME_USER_DATA_DIR") != None and os.environ.get("CHROME_USER_DATA_DIR") != "":
+        print(os.environ.get("CHROME_USER_DATA_DIR"))
+        
+        options = webdriver.ChromeOptions() 
+        options.add_argument("user-data-dir=" + os.environ["CHROME_USER_DATA_DIR"])
+        service = Service(executable_path=os.environ["CHROME_EXE_PATH"])
+        driver = webdriver.Chrome(service=service, options=options)
+    
+    driver.get("http://127.0.0.1:5000")
+    username = driver.find_element(By.ID, "email_phone")
+    username.clear()
+    password = driver.find_element(By.ID, "password")
+    password.clear()
+
+    username.send_keys("admin@admin.com")
+    password.send_keys("admin123")
+
+    username.send_keys(Keys.RETURN)
+
+    assert LOGGED_IN_MSG in driver.page_source
+    assert WRONG_CREDENTIALS_MSG not in driver.page_source
+
+
+    return driver
+
+def test_distance_in_meters():
+    driver = selenium_set_up()
+
+    text = driver.find_element(By.ID, "distanceToNearestSeaText").get_attribute("value")
+    assert "meters" in text
+
+
 def test_should_not_return_lakes():
     sea = get_closest_sea_helper(39.40, 38.48) # coordinates of Hazar Lake in Turkey
     assert sea["sea"] != "Hazar Lake"

@@ -45,6 +45,7 @@ def test_distance_in_meters():
     driver = selenium_set_up()
 
     text = driver.find_element(By.ID, "distanceToNearestSeaText").get_attribute("value")
+    assert "kilometers" not in text
     assert "meters" in text
 
 

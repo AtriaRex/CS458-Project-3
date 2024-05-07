@@ -1,5 +1,6 @@
 Flask==3.0.2
 google_auth_oauthlib==0.4.6
+pyopenssl==1.16.0
 pyperclip==1.8.2
 pytest==8.0.2
 python-dotenv==1.0.1

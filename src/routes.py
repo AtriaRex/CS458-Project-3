@@ -1,62 +1,22 @@
 from flask import Blueprint, request, render_template, session, redirect, abort, flash, jsonify
+
+from src.google_auth import GOOGLE_CLIENT_ID, flow
 import google.auth.transport.requests
 from pip._vendor import cachecontrol
 from google.oauth2 import id_token
+
+from astropy.coordinates import get_sun, EarthLocation
+from astropy import units as u
+from astropy.time import Time
+
 import requests
+
 import json
 import re
-from datetime import datetime
-from astropy.time import Time
-from astropy.coordinates import get_sun, EarthLocation, SkyCoord
-from astropy import units as u
-import requests
-from shapely.geometry import Point, shape, Polygon
-from shapely.ops import nearest_points
 
-
-from src.google_auth import GOOGLE_CLIENT_ID, flow
 
 bp = Blueprint("routes", __name__)
 
-def get_closest_sea_helper(longitude, latitude):
-    return {"sea": "asd", "distance": 0}
-
-
-@bp.route("/get-closest-sea", methods=["POST"])
-def get_closest_sea():
-    parameters = request.get_json()
-    longitude, latitude = parameters["longitude"], parameters["latitude"]
-
-    sea = get_closest_sea_helper(longitude, latitude)
-
-    return jsonify(sea)
-
-def calculate_distance_to_sun_helper(longitude, latitude, time):
-    earth_location = EarthLocation.from_geodetic(longitude, latitude)
-
-    sun_coord = get_sun(time)
-
-    earth_location_icrs = earth_location.get_itrs(obstime=time).transform_to(sun_coord.frame)
-
-    # Calculate distance
-    distance = sun_coord.separation_3d(earth_location_icrs)
-
-    return distance.to(u.km).value
-
-
-@bp.route("/calculate-distance-to-sun", methods=["POST"])
-def calculate_distance_to_sun():
-    parameters = request.get_json()
-    longitude, latitude = parameters["longitude"], parameters["latitude"]
-
-    distance = calculate_distance_to_sun_helper(longitude, latitude, Time.now())
-
-    return jsonify({"distance": distance})
-
-# Login Page
-@bp.route("/distance-to-sun", methods=["GET"])
-def distance_to_sun():
-    return render_template("distance-to-sun.html")
 
 # Login Page
 @bp.route("/")
@@ -107,7 +67,7 @@ def login():
         if valid_users:
             session["id"] = email_phone
             session["logged_in"] = True
-            return redirect("/mail")
+            return redirect("/nearest-sea")
         else:
             flash("Incorrect Email Address/Phone Number or Password", "alert alert-danger")
             return redirect("/login")
@@ -143,7 +103,7 @@ def callback():
     session["id"] = id_info.get("sub")
     session["logged_in"] = True
 
-    return redirect("/mail")
+    return redirect("/nearest-sea")
 
 
 # Logout
@@ -153,11 +113,42 @@ def logout():
     return redirect("/login") 
 
 
-# Protected page
-@bp.route("/mail", methods=["GET"])
-def mail():
+# Protected pages
+@bp.route("/nearest-sea", methods=["GET"])
+def nearest_sea():
     if "logged_in" not in session or session["logged_in"] != True:
         return abort(401) 
-    else:
-        return render_template("mail.html")
+    
+    return render_template("nearest-sea.html")
 
+
+@bp.route("/distance-to-sun", methods=["GET"])
+def distance_to_sun():
+    if "logged_in" not in session or session["logged_in"] != True:
+        return abort(401) 
+    
+    return render_template("distance-to-sun.html")
+
+def calculate_distance_to_sun_helper(longitude, latitude, time):
+    earth_location = EarthLocation.from_geodetic(longitude, latitude)
+
+    sun_coord = get_sun(time)
+
+    earth_location_icrs = earth_location.get_itrs(obstime=time).transform_to(sun_coord.frame)
+
+    # Calculate distance
+    distance = sun_coord.separation_3d(earth_location_icrs)
+
+    return distance.to(u.km).value
+
+@bp.route("/calculate-distance-to-sun", methods=["POST"])
+def calculate_distance_to_sun():
+    if "logged_in" not in session or session["logged_in"] != True:
+        return abort(401) 
+
+    parameters = request.get_json()
+    longitude, latitude = parameters["longitude"], parameters["latitude"]
+
+    distance = calculate_distance_to_sun_helper(longitude, latitude, Time.now())
+
+    return jsonify({"distance": distance})

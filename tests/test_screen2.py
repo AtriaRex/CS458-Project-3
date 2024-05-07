@@ -1,15 +1,14 @@
-from time import sleep
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
-import pyperclip
 from dotenv import load_dotenv
-import os
-import random
-from astropy.time import Time
 
-from src.routes import calculate_distance_to_sun_helper, get_closest_sea_helper
+import random
+import os
+
+from src.routes import  get_closest_sea_helper
+from tests.test_login import LOGGED_IN_MSG, WRONG_CREDENTIALS_MSG
 
 load_dotenv()
 
@@ -41,13 +40,12 @@ def selenium_set_up():
 
     return driver
 
-def test_distance_in_meters():
+def test_distance_in_kilometers():
     driver = selenium_set_up()
 
     text = driver.find_element(By.ID, "distanceToNearestSeaText").get_attribute("value")
-    assert "kilometers" not in text
-    assert "meters" in text
-
+    assert "kilometers" in text
+    assert "meters" not in text
 
 def test_should_not_return_lakes():
     sea = get_closest_sea_helper(39.40, 38.48) # coordinates of Hazar Lake in Turkey
@@ -57,11 +55,11 @@ def test_should_not_return_lakes():
     assert sea["sea"] != "Van Lake"
 
 def test_maximum_distance():
-    for i in range(5):
+    for i in range(100):
         longitude = random.random() * 9 + 26 # longitude in Turkey
         latitude = random.random() * 6 + 36 # latitude in Turkey
         sea = get_closest_sea_helper(longitude, latitude)
-        assert sea["distance"] < 1650000 # 1650 km
+        assert sea["distance"] < 500
 
 def test_correct_sea_returned():
     sea = get_closest_sea_helper(39.71, 41.00) # coordinates of Trabzon 

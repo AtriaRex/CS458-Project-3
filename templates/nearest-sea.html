@@ -8,6 +8,8 @@
 
     <script src="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js"></script>
     <link href="https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css" rel="stylesheet" />
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </head>
 
 <style>
@@ -55,8 +57,6 @@
 </body>
 
 <script>
-
-
     // Check if the client's device supports geolocation
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {

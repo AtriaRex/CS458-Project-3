@@ -1,23 +1,31 @@
-const { calculateDistance, getNearestSea, getDistanceToSun } = require('./main');
+const { getDistanceToNearestSea, findClosestPointOnLine, calculateDistanceInKm } = require('./main');
 
-// calculateDistance tests
-test('distance between the same point should be zero', () => {
-    let point = { lat: 1, lon: 2 };
-    expect(calculateDistance(point, point)).toBe(0);
-});
+test("should not return lakes", () => {
+    expect(getDistanceToNearestSea(39.4, 38.48).sea).not.toBe('Hazar Lake');
 
-// findNearestSea tests
-test('(43,34) should return BlackSea', () => {
-    let point = { lat: 43, lon: 34 };
-    expect(findNearestSea(point).sea).toBe('BlackSea');
-});
+    expect(getDistanceToNearestSea(42.91, 38.61).sea).not.toBe('Van Lake');
+})
 
-test("distance to sun calculation validity check", () => {
-    for (let i = 0; i < 5; i++) {
-        let point = { lat: (Math.random() * 180) - 90, lon: (Math.random() * 360) - 180 };
-        let distance = getDistanceToSun(point);
-        distance = distance.distance;
-        expect(distance).toBeGreaterThan(146000000); // 146 million km
-        expect(distance).toBeLessThan(153000000); // 153 million km
+test("maximum distance of nearest sea", () => {
+    for (let i = 0; i < 100; i++) {
+        let longitude = Math.random() * 9 + 26;
+        let latitude = Math.random() * 6 + 36;
+        let distance = getDistanceToNearestSea(latitude, longitude);
+        expect(distance.distance).toBeLessThan(500); // 500 km
     }
+})
+
+
+test("correct sea returned", () => {
+    let point = { lat: 39.71, lon: 41 };
+    expect(getDistanceToNearestSea(point.lat, point.lon).sea).toBe('Black Sea');
+
+    point = { lat: 30.70, lon: 36.39 };
+    expect(getDistanceToNearestSea(point.lat, point.lon).sea).toBe('Mediterranean Sea');
+
+    point = { lat: 38.30, lon: 26.51 };
+    expect(getDistanceToNearestSea(point.lat, point.lon).sea).toBe('Aegean Sea');
+
+    point = { lat: 40.18, lon: 29.06 };
+    expect(getDistanceToNearestSea(point.lat, point.lon).sea).toBe('Sea of Marmara');
 })

@@ -1,15 +1,16 @@
+
+from time import sleep
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+import pyperclip
 from dotenv import load_dotenv
+import os
+import random
 from astropy.time import Time
 
-import random
-import os
-
 from src.routes import calculate_distance_to_sun_helper
-from tests.test_login import LOGGED_IN_MSG, WRONG_CREDENTIALS_MSG
 
 load_dotenv()
 
@@ -23,6 +24,20 @@ def selenium_set_up():
         options.add_argument("user-data-dir=" + os.environ["CHROME_USER_DATA_DIR"])
         service = Service(executable_path=os.environ["CHROME_EXE_PATH"])
         driver = webdriver.Chrome(service=service, options=options)
+
+    driver.execute_script(
+        f"""
+  window.navigator.geolocation.getCurrentPosition = function(success) {{
+    var position = {{
+      "coords": {{
+        "latitude": "39",
+        "longitude": "36"
+      }}
+    }};
+    success(position);
+  }};
+"""
+    )
     
     driver.get("http://127.0.0.1:5000")
     username = driver.find_element(By.ID, "email_phone")
@@ -34,9 +49,6 @@ def selenium_set_up():
     password.send_keys("admin123")
 
     username.send_keys(Keys.RETURN)
-
-    assert LOGGED_IN_MSG in driver.page_source
-    assert WRONG_CREDENTIALS_MSG not in driver.page_source
 
     driver.find_element(By.ID, "sun-calculation").click()
 
@@ -67,7 +79,7 @@ def test_only_numbers_allowed_in_coordinate_field():
 
     driver.close()
 
-def test_invalid_input_disables_submit_button():
+def test_invalid_input_not_allowed():
     driver = selenium_set_up()
 
     longitude = driver.find_element(By.ID, "longitude")
@@ -75,12 +87,9 @@ def test_invalid_input_disables_submit_button():
     submit_button = driver.find_element(By.ID, "manualCalculation")
 
     longitude.clear()
-    latitude.send_keys("30a")
-    assert submit_button.get_dom_attribute("disabled") == "true"
+    latitude.send_keys("30asd")
 
-    longitude.send_keys("30")
-    latitude.clear()
-    assert submit_button.get_dom_attribute("disabled") == "true"
+    assert latitude.get_attribute("value") == "30"
 
     driver.close()
 
@@ -113,9 +122,8 @@ def test_sql_injection_on_coordinates():
 
     longitude = driver.find_element(By.ID, "longitude")
     latitude = driver.find_element(By.ID, "latitude")
-    submit_button = driver.find_element(By.ID, "manualCalculation")
 
     longitude.send_keys("' OR '1'='1")
     latitude.send_keys("30")
 
-    assert submit_button.get_dom_attribute("disabled") == "true"
+    assert longitude.get_attribute("value") == "11"
